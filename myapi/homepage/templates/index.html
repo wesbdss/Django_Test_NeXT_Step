@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>47 Bank</title>
+</head>
+
+<body class='bg-dark'>
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark text-white">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">47 Bank</a>
+            <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+    </nav>
+    <div class="container bg-light">
+        <center>
+            <h1>47 Bank Routes</h1>
+
+            <div class="row justify-content-center">
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Person Media</h5>
+                            <p class="card-text">Route Person Media</p>
+                            <div class="row">
+                                <a href="/api/person_media" class="btn btn-primary w-100 mb-1">/api/person_media</a>
+                            </div>
+                            <div class="row">
+                                <a href="/api/person_media/1" class="btn btn-primary w-100">/api/person_media/:id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Person Type</h5>
+                            <p class="card-text">Route Person Type</p>
+                            <div class="row">
+                                <a href="/api/person_type" class="btn btn-primary w-100 mb-1">/api/person_type</a>
+                            </div>
+                            <div class="row">
+                                <a href="/api/person_type/1" class="btn btn-primary w-100">/api/person_type/:id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Person Media Type</h5>
+                            <p class="card-text">Route Person Media Type</p>
+                            <div class="row">
+                                <a href="/api/person_media_type" class="btn btn-primary w-100 mb-1">/api/person_media_type</a>
+                            </div>
+                            <div class="row">
+                                <a href="/api/person_media_type/1" class="btn btn-primary w-100">/api/person_media_type/:id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Person Audit</h5>
+                            <p class="card-text">Route Person Audit</p>
+                            <div class="row">
+                                <a href="/api/person_audit" class="btn btn-primary w-100 mb-1">/api/person_audit</a>
+                            </div>
+                            <div class="row">
+                                <a href="/api/person_audit/1" class="btn btn-primary w-100">/api/person_audit/:id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Person</h5>
+                            <p class="card-text">Route Person</p>
+                            <div class="row">
+                                <a href="/api/person" class="btn btn-primary w-100 mb-1">/api/person</a>
+                            </div>
+                            <div class="row">
+                                <a href="/api/person/1" class="btn btn-primary w-100">/api/person/:id</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </center>
+
+        <div class="row justify-content-center">
+            <h1>Instruções</h1>
+
+        </div>
+        <div class="col justify-content-center text-center">
+            <p>Configurar o database postgres na configuração /myapi/settings</p>
+            <p>Rodar: python manage.py makemigrations</p>
+            <p>Rodar: python manage.py migrate</p>
+            <p>Configurar conta de admin com: python manage.py createsuperuser</p>
+            <p>Rodar: python manage.py runserver</p>
+            <p>Logar para ter acesso ao POST dos endpoints</p>
+            <h2>Código utilizado nos Triggers Postegres</h2>
+            <code>
+                	
+CREATE OR REPLACE FUNCTION person_insert_t_fnc()
+RETURNS trigger AS
+
+$$
+	BEGIN
+		INSERT INTO "api_person_audit" ("person_id_id","person_audit_type","cpf_new","last_update")
+		VALUES(NEW."id",1,NEW."cpf",current_date);
+		RETURN NEW;
+	END;	
+$$
+LANGUAGE 'plpgsql';
+
+
+
+CREATE TRIGGER on_insert_person
+AFTER INSERT 
+on "api_person"
+FOR EACH ROW
+EXECUTE PROCEDURE person_insert_t_fnc();
+
+
+CREATE OR REPLACE FUNCTION person_update_t_fnc()
+RETURNS trigger AS
+
+$$
+	BEGIN
+		INSERT INTO "api_person_audit" ("person_id_id","person_audit_type","cpf_new","cpf_old","last_update")
+		VALUES(NEW."id",2,NEW."cpf",OLD.cpf,current_date);
+		
+		RETURN NEW;
+	END;	
+$$
+
+LANGUAGE 'plpgsql';
+
+CREATE TRIGGER on_update_person
+AFTER UPDATE 
+on "api_person"
+FOR EACH ROW
+EXECUTE PROCEDURE person_update_t_fnc();
+            </code>
+
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>
