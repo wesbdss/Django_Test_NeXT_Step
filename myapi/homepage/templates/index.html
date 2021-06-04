@@ -139,8 +139,15 @@ RETURNS trigger AS
 
 $$
 	BEGIN
-		INSERT INTO "api_person_audit" ("person_id_id","person_audit_type","cpf_new","cpf_old","last_update")
-		VALUES(NEW."id",2,NEW."cpf",OLD.cpf,current_date);
+    IF OLD.cpf IS NOT DISTINCT FROM NEW.cpf THEN
+		INSERT INTO "api_person_audit" ("person_id_id","person_audit_type","cpf_new","last_update")
+		VALUES(NEW."id",2,NEW."cpf",current_date);
+        END IF;
+
+        IF OLD.cpf IS NOT DISTINCT FROM NEW.cpf THEN
+            INSERT INTO "api_person_audit" ("person_id_id","person_audit_type","cpf_new","cpf_old","last_update")
+            VALUES(NEW."id",2,NEW."cpf",OLD.cpf,current_date);
+        END IF;
 		
 		RETURN NEW;
 	END;	
